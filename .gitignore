@@ -5,6 +5,20 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Bot configuration and sensitive files
+conf/bot.token
+conf/cryptopanic.token
+conf/*.token
+.env*
+!.env.prod.template
+conf/config.json
+conf/config.prod.json
+conf/config.local.json
+!conf/config.template.json
+*.pem
+*.key
+*.crt
+
 # C extensions
 *.so
 
@@ -106,5 +120,9 @@ venv.bak/
 .mypy_cache/
 
 .idea
-/data/opencryptobot.db
+/data/
 /log/
+/logs/
+*.db
+*.sqlite3
+.cursor/

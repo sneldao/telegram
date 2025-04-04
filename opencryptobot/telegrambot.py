@@ -35,14 +35,16 @@ class TelegramBot:
         self.db = bot_db
         self.token = bot_token
 
-        read_timeout = Cfg.get("telegram", "read_timeout")
-        connect_timeout = Cfg.get("telegram", "connect_timeout")
+        read_timeout = os.getenv("TELEGRAM_READ_TIMEOUT") or Cfg.get("telegram", "read_timeout")
+        connect_timeout = os.getenv("TELEGRAM_CONNECT_TIMEOUT") or Cfg.get("telegram", "connect_timeout")
 
         kwargs = dict()
         if read_timeout:
-            kwargs["read_timeout"] = read_timeout
+            kwargs["read_timeout"] = int(read_timeout)
         if connect_timeout:
-            kwargs["connect_timeout"] = connect_timeout
+            kwargs["connect_timeout"] = int(connect_timeout)
+
+        logging.info(f"Telegram connection settings: read_timeout={read_timeout}, connect_timeout={connect_timeout}")
 
         try:
             self.updater = Updater(bot_token, request_kwargs=kwargs)
@@ -240,19 +242,27 @@ class TelegramBot:
         cls_name = f"Class: {type(self).__name__}"
         logging.error(f"{error} - {cls_name} - {update}")
 
+        # Don't send error messages for connection errors
+        if 'Connection' in str(error) or 'HTTPError' in str(error):
+            logging.warning(f"Network error detected: {error}")
+            return  # Don't try to send a message if we have connection issues
+            
         if not update:
             return
 
         error_msg = f"{emo.ERROR} Telegram ERROR: *{error}*"
 
-        if update.message:
-            update.message.reply_text(
-                text=error_msg,
-                parse_mode=ParseMode.MARKDOWN)
-        elif update.callback_query:
-            update.callback_query.message.reply_text(
-                text=error_msg,
-                parse_mode=ParseMode.MARKDOWN)
+        try:
+            if update.message:
+                update.message.reply_text(
+                    text=error_msg,
+                    parse_mode=ParseMode.MARKDOWN)
+            elif update.callback_query:
+                update.callback_query.message.reply_text(
+                    text=error_msg,
+                    parse_mode=ParseMode.MARKDOWN)
+        except Exception as ex:
+            logging.error(f"Failed to send error message: {ex}")
 
     def _refresh_cache(self):
         if Cfg.get("refresh_cache") is not None:

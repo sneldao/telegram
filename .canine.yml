@@ -1,0 +1,45 @@
+version: "1"
+name: telegram-crypto-bot
+
+services:
+  bot:
+    dockerfile: Dockerfile
+    port: 8443 # For webhook mode
+    env:
+      - TELEGRAM_BOT_TOKEN
+      - TELEGRAM_READ_TIMEOUT
+      - TELEGRAM_CONNECT_TIMEOUT
+      - CONFIG_FILE=/app/conf/config.prod.json
+    volumes:
+      - name: bot-data
+        mountPath: /app/data
+      - name: bot-logs
+        mountPath: /app/logs
+      - name: bot-config
+        mountPath: /app/conf
+        readOnly: true
+    resources:
+      memory: 512Mi
+      cpu: 0.5
+    healthcheck:
+      path: /health
+      port: 8443
+      initialDelaySeconds: 30
+      periodSeconds: 30
+
+volumes:
+  - name: bot-data
+    size: 1Gi
+  - name: bot-logs
+    size: 1Gi
+  - name: bot-config
+    size: 100Mi
+
+secrets:
+  - TELEGRAM_BOT_TOKEN
+  - COINMARKETCAP_API_KEY
+  - TWITTER_CONSUMER_KEY
+  - TWITTER_CONSUMER_SECRET
+  - TWITTER_ACCESS_TOKEN
+  - TWITTER_ACCESS_TOKEN_SECRET
+  - CRYPTOPANIC_API_KEY

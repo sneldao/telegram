@@ -5,11 +5,13 @@ import opencryptobot.constants as con
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from pathlib import Path
+from typing import Any
 
 
 class ConfigManager:
 
-    _CFG_FILE = con.CFG_FILE
+    _CFG_FILE = os.path.join(con.CFG_DIR, con.CFG_FILE)
 
     _cfg = dict()
 
@@ -52,20 +54,39 @@ class ConfigManager:
             exit(f"ERROR: No configuration file '{cfg_file}' found")
 
     @staticmethod
-    def get(*keys):
+    def _get_token():
+        # First try environment variable
+        token = os.getenv("TELEGRAM_BOT_TOKEN")
+        logging.debug(f"Token from env: {token}")
+        if token:
+            return token
+
+        # Fallback to token file
+        token_path = os.path.join(con.CFG_DIR, con.TKN_FILE)
+        logging.debug(f"Looking for token file at: {token_path}")
+        if os.path.isfile(token_path):
+            with open(token_path, 'r') as file:
+                return file.read().strip()
+        return None
+
+    @staticmethod
+    def get(*args) -> Any:
+        # Special case for bot token
+        if args and args[0] == "bot_token":
+            return ConfigManager._get_token()
+
         if not ConfigManager._cfg:
             ConfigManager._read_cfg()
 
-        value = ConfigManager._cfg
-        for key in keys:
-            try:
-                value = value[key]
-            except KeyError as e:
-                err = f"Couldn't read '{key}' from Config"
-                logging.debug(f"{repr(e)} - {err}")
-                return None
+        if not args:
+            return ConfigManager._cfg
 
-        return value if value is not None else None
+        value = ConfigManager._cfg
+        for arg in args:
+            value = value.get(arg, None)
+            if value is None:
+                return None
+        return value
 
     @staticmethod
     def set(value, *keys):

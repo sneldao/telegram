@@ -157,11 +157,18 @@ class OpenCryptoBot:
                 logr = logging.getLogger(module)
                 logr.setLevel(int(loglvl))
 
-    # Read bot token from file
+    # Read bot token from environment or file
     def _get_bot_token(self):
+        # First check command line argument
         if self.args.token:
             return self.args.token
 
+        # Then check environment variable
+        token = os.getenv("TELEGRAM_BOT_TOKEN")
+        if token:
+            return token
+
+        # Finally check token file
         token_path = os.path.join(con.CFG_DIR, con.TKN_FILE)
 
         try:

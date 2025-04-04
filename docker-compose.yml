@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  bot:
+    build: .
+    volumes:
+      - ./conf:/app/conf
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_READ_TIMEOUT=30
+      - TELEGRAM_CONNECT_TIMEOUT=30
+    restart: unless-stopped

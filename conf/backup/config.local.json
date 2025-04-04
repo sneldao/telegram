@@ -1,5 +1,7 @@
 {
-    "admin_id": [],
+    "admin_id": [
+        569392733
+    ],
     "telegram": {
         "read_timeout": 10,
         "connect_timeout": 10
@@ -9,7 +11,7 @@
         "port": 8443,
         "privkey_path": "/path/to/privkey.pem",
         "cert_path": "/path/to/cert.pem",
-        "url": "https://your-domain.com"
+        "url": "https://somedomain.com"
     },
     "database": {
         "use_db": true,
@@ -23,8 +25,8 @@
     },
     "refresh_cache": "6h",
     "update": {
-        "github_user": "",
-        "github_repo": "",
+        "github_user": "Endogen",
+        "github_repo": "OpenCryptoBot",
         "update_hash": null,
         "update_check": "1d"
     }
