@@ -10,6 +10,7 @@ services:
       - TELEGRAM_READ_TIMEOUT
       - TELEGRAM_CONNECT_TIMEOUT
       - CONFIG_FILE=/app/conf/config.prod.json
+      - ENVIRONMENT=production
     volumes:
       - name: bot-data
         mountPath: /app/data
@@ -17,6 +18,9 @@ services:
         mountPath: /app/logs
       - name: bot-config
         mountPath: /app/conf
+        readOnly: true
+      - name: ssl-certs
+        mountPath: /app/conf/ssl
         readOnly: true
     resources:
       memory: 512Mi
@@ -26,6 +30,12 @@ services:
       port: 8443
       initialDelaySeconds: 30
       periodSeconds: 30
+    ingress:
+      enabled: true
+      domain: your-domain.com # Replace with your domain
+      tls:
+        enabled: true
+        secretName: bot-tls-secret
 
 volumes:
   - name: bot-data
@@ -33,6 +43,8 @@ volumes:
   - name: bot-logs
     size: 1Gi
   - name: bot-config
+    size: 100Mi
+  - name: ssl-certs
     size: 100Mi
 
 secrets:

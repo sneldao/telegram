@@ -17,13 +17,24 @@ if [ -d "venv" ]; then
   source venv/bin/activate
 fi
 
+# Set default config file
+CONFIG_FILE=${CONFIG_FILE:-"conf/config.json"}
+
 # Run with retry logic
 MAX_RETRIES=3
 RETRY_COUNT=0
 
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
   echo "Starting bot (attempt $((RETRY_COUNT+1))/$MAX_RETRIES)"
-  python -m opencryptobot -lvl 20
+  
+  # Use webhook in production, polling in development
+  if [ "$ENVIRONMENT" = "production" ]; then
+    echo "Starting in webhook mode (production)"
+    python -m opencryptobot -cfg "$CONFIG_FILE" -lvl 20 --webhook
+  else
+    echo "Starting in polling mode (development)"
+    python -m opencryptobot -cfg "$CONFIG_FILE" -lvl 20
+  fi
   
   EXIT_CODE=$?
   if [ $EXIT_CODE -eq 0 ]; then

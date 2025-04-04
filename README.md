@@ -1,5 +1,6 @@
 # OpenCryptoBot
-Welcome to the Swiss Army knife for crypto! *OpenCryptoBot* is an open source Telegram bot written in Python and you can [add this bot directly](https://telegram.me/OpenCryptoBot) or add him by searching for user *@OpenCryptoBot* on Telegram.
+
+Welcome to the Swiss Army knife for crypto! _OpenCryptoBot_ is an open source Telegram bot written in Python and you can [add this bot directly](https://telegram.me/OpenCryptoBot) or add him by searching for user _@OpenCryptoBot_ on Telegram.
 
 If you are interested in news regarding this bot or want more indept explanations for all available commands, please visit the [homepage](https://endogen.github.io/OpenCryptoBot).
 
@@ -14,167 +15,245 @@ If you are interested in news regarding this bot or want more indept explanation
 </p>
 
 ## Overview
-This Python script is a polling based Telegram bot. [Webhook mode](https://github.com/python-telegram-bot/python-telegram-bot/wiki/Webhooks) is implemented but untested.
+
+This Python script is a Telegram bot that can run in both polling and webhook modes. It provides comprehensive cryptocurrency information and tracking capabilities.
+
+## Development Setup
+
+### Prerequisites
+
+- Python 3.7
+- Docker and Docker Compose (for containerized deployment)
+- Git
+
+### Local Development
+
+1. Clone the repository:
+
+```bash
+git clone <your-repo-url>
+cd opencryptobot
+```
+
+2. Create and configure environment files:
+
+```bash
+# Copy environment template
+cp .env.prod.template .env
+
+# Copy config template
+cp conf/config.template.json conf/config.json
+
+# Edit .env with your values
+# Edit conf/config.json with your settings
+```
+
+3. Run with Docker (recommended):
+
+```bash
+# Build and start the bot
+docker compose up -d
+
+# View logs
+docker compose logs -f
+```
+
+4. Run without Docker (alternative):
+
+```bash
+# Create virtual environment
+python3.7 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the bot
+./run.sh
+```
+
+## Production Deployment
+
+This bot can be deployed to production using Canine, a Kubernetes-based deployment platform.
+
+### Prerequisites
+
+- Docker v24.0.0 or higher
+- Docker Compose v2.0.0 or higher
+- Canine CLI
+
+### Deployment Steps
+
+1. Install Canine:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/czhu12/canine/refs/heads/main/install/install.sh | bash
+```
+
+2. Prepare Production Configuration:
+
+```bash
+# Copy and edit production config
+cp conf/config.template.json conf/config.prod.json
+
+# Copy and edit production environment
+cp .env.prod.template .env.prod
+```
+
+3. Configure Production Settings:
+
+   - Update `conf/config.prod.json` with your webhook domain
+   - Set up SSL certificates for webhook
+   - Configure admin IDs and rate limits
+   - Set up API keys for external services
+
+4. Deploy to Canine:
+
+```bash
+canine deploy -f .canine.yml --env-file .env.prod
+```
+
+### Production Features
+
+- **Webhook Mode**: More efficient than polling for production
+- **Auto-scaling**: Handled by Kubernetes
+- **Persistent Storage**: Data and logs are preserved
+- **Health Checks**: Automatic monitoring and restart
+- **SSL/TLS**: Secure webhook endpoints
+- **Resource Limits**: Controlled CPU and memory usage
+
+### Environment Variables
+
+- `TELEGRAM_BOT_TOKEN`: Your Telegram bot token
+- `ENVIRONMENT`: Set to "production" for webhook mode
+- `TELEGRAM_READ_TIMEOUT`: Connection timeout (default: 30)
+- `TELEGRAM_CONNECT_TIMEOUT`: Connection timeout (default: 30)
+- Additional API keys for various services (optional)
+
+### Configuration Files
+
+- `.env.prod`: Production environment variables
+- `conf/config.prod.json`: Production bot configuration
+- `.canine.yml`: Canine deployment configuration
+
+### Monitoring and Maintenance
+
+- View logs through Canine dashboard
+- Monitor resource usage
+- Set up alerts for errors
+- Zero-downtime updates
+
+## Security Notes
+
+- Never commit sensitive data (tokens, keys, etc.)
+- Use environment variables for secrets
+- Keep SSL certificates secure
+- Regularly update dependencies
+- Monitor bot usage and rate limits
 
 ### General bot features
-* Written in Python and fully open source
-* Update notifications for new releases on GitHub
-* Update your running bot to any release or branch
-* Admin specific commands like `restart` and `shutdown`
-* Every command is a plugin that can be enabled / disabled
-* Custom rate limit per user or per user and command
-* Use database to track usage or disable it all together
-* Cache functionality (can be disabled)
-* Run the bot locally or hosted on a server
-* Powerful logging functionality
-* Set up the bot by using command line arguments
-* Bot can be administered by more then one user
-* Data provided by seven different API providers
-* BPMN diagrams for commands to understand the data flow
-* Users can provide feedback about the bot
-* Experimental inline-mode (only `price` command for now)
-* Repeatedly send commands at specified time interval
+
+- Written in Python and fully open source
+- Update notifications for new releases on GitHub
+- Update your running bot to any release or branch
+- Admin specific commands like `restart` and `shutdown`
+- Every command is a plugin that can be enabled / disabled
+- Custom rate limit per user or per user and command
+- Use database to track usage or disable it all together
+- Cache functionality (can be disabled)
+- Run the bot locally or hosted on a server
+- Powerful logging functionality
+- Set up the bot by using command line arguments
+- Bot can be administered by more then one user
+- Data provided by seven different API providers
+- BPMN diagrams for commands to understand the data flow
+- Users can provide feedback about the bot
+- Experimental inline-mode (only `price` command for now)
+- Repeatedly send commands at specified time interval
 
 ### Command features
-* Current price
-* Price change over time
-* Current and historical volume
-* Market capitalization
-* Candlestick charts
-* Price and volume charts
-* All Time High details
-* Calculated value of coin quantity
-* Find out where to buy a coin
-* Sort trading pairs by volume
-* Details about the team behind a coin
-* Details about the people in a team
-* Coin-specific news or filtered by keywords
-* Return on Investment for a coin
-* Details about ICO if there was one
-* Whitepaper download
-* Best and worst movers
-* Compare different coins
-* Google Trends chart for keywords
-* Description for a coin
-* Details about exchanges and toplist
-* Details about coin development
-* Social media links and stats
-* Get a coin summary
-* Global dominance, volume and market cap
-* Coin logo and technical coin details
-* Search for a coin by name
-* Get latest Tweets from Twitter for a coin
+
+- Current price
+- Price change over time
+- Current and historical volume
+- Market capitalization
+- Candlestick charts
+- Price and volume charts
+- All Time High details
+- Calculated value of coin quantity
+- Find out where to buy a coin
+- Sort trading pairs by volume
+- Details about the team behind a coin
+- Details about the people in a team
+- Coin-specific news or filtered by keywords
+- Return on Investment for a coin
+- Details about ICO if there was one
+- Whitepaper download
+- Best and worst movers
+- Compare different coins
+- Google Trends chart for keywords
+- Description for a coin
+- Details about exchanges and toplist
+- Details about coin development
+- Social media links and stats
+- Get a coin summary
+- Global dominance, volume and market cap
+- Coin logo and technical coin details
+- Search for a coin by name
+- Get latest Tweets from Twitter for a coin
 
 ## Configuration
-This part is only relevant if you want to host this bot yourself. If you just want to use the bot, add user *@OpenCryptoBot* to your Telegram contacts.
+
+This part is only relevant if you want to host this bot yourself. If you just want to use the bot, add user _@OpenCryptoBot_ to your Telegram contacts.
 
 Before starting up the bot you have to take care of some settings and add some API tokens. All configuration files or token files are located in the `conf` folder.
 
 ### config.json
-This file holds the configuration for the bot. You have to at least edit the value for __admin_id__. Every else setting is optional.
 
-- __admin_id__: This is a list of Telegram user IDs that will control the bot. You can just add your own user or multiple users if you want. If you don't know your Telegram user ID, get in a conversation with Telegram bot [@userinfobot](https://telegram.me/userinfobot) and if you write him he will return you your user ID.
-- __telegram - read_timeout__: Read timeout in seconds as integer. Default Telegram value is about 5 seconds. Usually this value doesn't have to be changed.
-- __telegram - connect_timeout__: Connect timeout in seconds as integer. Default Telegram value is about 5 seconds. Usually this value doesn't have to be changed.
-- __webhook - listen__: Required for webhook mode. IP to listen to.
-- __webhook - port__: Required for webhook mode. Port to listen on.
-- __webhook - privkey_path__: Required for webhook mode. Path to private key  (.pem file).
-- __webhook - cert_path__: Required for webhook mode. Path to certificate (.pem file).
-- __webhook - url__: Required for webhook mode. URL where the bot is hosted.
-- __use_db__: If `true` then a new database file (SQLite) will be generated on first start and every usage of the bot will be recorded in this database. If `false`, no database will be used.
-- __rate_limit - enabled__: If `true` then a rate limit for users will be activated so that only a specific number of requests in a specific timeframe are possible. If `false` then rate limit functionality will be disabled.
-- __rate_limit - requests__: Number (integer) of API requests that are allowed for a specific timeframe (see _rate_limit - timespan_).
-- __rate_limit - timespan__: Number (integer) of seconds for which the issued API requests will be counted. If the count exceeds the value in _rate_limit - requests_, the user will be informed and can not issue new requests until the timeframe is reached.
-- __rate\_limit - incl_cmd__: If `true` then the rate limit will be per command. If `false` then it doesn't matter which command you used. If you exceed the limit you can't issue any API calls anymore until the timeframe is over.
-- __refresh_cache__: If `null` then caching is disabled and every API call will reach the API provider. It's highly recommanded to enabled caching. The timeframe to refresh the cache can be specified in seconds `s` or minutes `m` or hours `h` or days `d`. Example: `6h`.
-- __update - github_user__: Only relevant if you want to provide your own updates. The GitHub username.
-- __update - github_repo__: Only relevant if you want to provide your own updates. The GitHub repository that you want to do the updates from.
-- __update - update_hash__: *This should not be changed*. The bot saves here the hash of the currently running bot (only if an update happened).
-- __update - update_hash__: How ofter should the bot automatically check for updates? The timeframe can be specified in seconds `s` or minutes `m` or hours `h` or days `d`. Example: `1d`. To disable update checks, enter `null`.
+This file holds the configuration for the bot. You have to at least edit the value for **admin_id**. Every else setting is optional.
+
+- **admin_id**: This is a list of Telegram user IDs that will control the bot. You can just add your own user or multiple users if you want. If you don't know your Telegram user ID, get in a conversation with Telegram bot [@userinfobot](https://telegram.me/userinfobot) and if you write him he will return you your user ID.
+- **telegram - read_timeout**: Read timeout in seconds as integer. Default Telegram value is about 5 seconds. Usually this value doesn't have to be changed.
+- **telegram - connect_timeout**: Connect timeout in seconds as integer. Default Telegram value is about 5 seconds. Usually this value doesn't have to be changed.
+- **webhook - listen**: Required for webhook mode. IP to listen to.
+- **webhook - port**: Required for webhook mode. Port to listen on.
+- **webhook - privkey_path**: Required for webhook mode. Path to private key (.pem file).
+- **webhook - cert_path**: Required for webhook mode. Path to certificate (.pem file).
+- **webhook - url**: Required for webhook mode. URL where the bot is hosted.
+- **use_db**: If `true` then a new database file (SQLite) will be generated on first start and every usage of the bot will be recorded in this database. If `false`, no database will be used.
+- **rate_limit - enabled**: If `true` then a rate limit for users will be activated so that only a specific number of requests in a specific timeframe are possible. If `false` then rate limit functionality will be disabled.
+- **rate_limit - requests**: Number (integer) of API requests that are allowed for a specific timeframe (see _rate_limit - timespan_).
+- **rate_limit - timespan**: Number (integer) of seconds for which the issued API requests will be counted. If the count exceeds the value in _rate_limit - requests_, the user will be informed and can not issue new requests until the timeframe is reached.
+- **rate_limit - incl_cmd**: If `true` then the rate limit will be per command. If `false` then it doesn't matter which command you used. If you exceed the limit you can't issue any API calls anymore until the timeframe is over.
+- **refresh_cache**: If `null` then caching is disabled and every API call will reach the API provider. It's highly recommanded to enabled caching. The timeframe to refresh the cache can be specified in seconds `s` or minutes `m` or hours `h` or days `d`. Example: `6h`.
+- **update - github_user**: Only relevant if you want to provide your own updates. The GitHub username.
+- **update - github_repo**: Only relevant if you want to provide your own updates. The GitHub repository that you want to do the updates from.
+- **update - update_hash**: _This should not be changed_. The bot saves here the hash of the currently running bot (only if an update happened).
+- **update - update_hash**: How ofter should the bot automatically check for updates? The timeframe can be specified in seconds `s` or minutes `m` or hours `h` or days `d`. Example: `1d`. To disable update checks, enter `null`.
 
 ### bot.token
+
 This file holds the Telegram bot token. You have to provide one and you will get it in a conversation with Telegram user [@BotFather](https://telegram.me/BotFather) while registering your bot.
 
 ### cryptopanic.token
+
 This file is optional and only needed if you use the `news` plugin. News are requested from [http://cryptopanic.com](http://cryptopanic.com) and thus you have to register an account there and get you API token and enter it in here.
 
-## Starting
-In order to run the bot you need to execute some Python code. If you don't have any idea where to host the bot, take a look at [Where to host Telegram Bots](https://github.com/python-telegram-bot/python-telegram-bot/wiki/Where-to-host-Telegram-Bots). But services like [Heroku](https://www.heroku.com) (free) will work fine too. You can also run the script locally on your own computer for testing purposes.
-
-### Prerequisites
-##### Python version
-You have to use at least __Python 3.7__ to execute the scripts. Everything else is not supported.
-
-##### Installing needed modules from `Pipfile`
-Install all needed Python modules automatically with [Pipenv](https://pipenv.readthedocs.io). You have to be in the root folder of the bot - on the same level as the `Pipfile`:
-
-```shell
-pipenv install
-```
-
-##### Installing needed modules from `requirements.txt`
-This is an alternative way to install all needed Python modules. If done this way, every installed module will be available for every other Python script you run. Installing modules globally is only recommanded if you know what you are doing:
-
-1. Generate `requirements.txt` from `Pipfile`
-
-```shell
-pipenv lock -r
-```
-
-2. Install all needed Python modules
-
-```shell
-pip3 install -r requirements.txt
-```
-
-##### Installing `orca`
-After you installed the modules, you also have to install [orca](https://github.com/plotly/orca) if you want to use the `candlestick` plugin or the `chart` plugin (because [Plotly](https://plot.ly/python) is used to generate the static charts and `orca` is a dependency for static image generation under Plotly). For more info check out [Plotly Static Image Export](https://plot.ly/python/static-image-export)
-
-If you get error `xvfb-run: error:Xvfb failed to start` please execute:
-
-```script
-xvfb-run -a /path/to/orca "$@"
-```
-
-### Starting
-1. First you have to make the script `run.sh` executable with
-
-```shell
-chmod +x run.sh
-```
-
-2. If you installed the needed Python modules via `Pipfile` you have to execute the following in the root folder of the bot:
-
-```shell
-pipenv run ./run.sh &
-```
-
-If you installed the modules globally:
-
-```shell
-./run.sh &
-```
-
-### Stopping
-The recommanded way to stop the bot is the bot command `/shutdown`. If you don't want or can't use this, you can shut the bot down with:
-
-```shell
-pkill python3.7
-```
-
-which will kill __every__ Python 3.7 process that is currently running.
-
 ## Usage
+
 If you configured the bot correctly and execute it, the bot will check for updates (if enabled in `config.json`) and notify you if a new release is available. **Please ignore the update if you purposely downloaded the newest version from the `master` branch because the bot will only notify you about releases**. And in this case the release will be older then the current version from the `master` branch.
 
 ### Available commands
+
 ##### Charts
+
 ```
 /c - Chart with price and volume
 /cs - Candlestick chart for coin
 ```
 
 ##### Price
+
 ```
 /51 - PoW 51% attack cost
 /ath - All time high price for coin
@@ -189,6 +268,7 @@ If you configured the bot correctly and execute it, the bot will check for updat
 ```
 
 ##### General
+
 ```
 /comp - Compare coins
 /de - Show decentralization info
@@ -208,6 +288,7 @@ If you configured the bot correctly and execute it, the bot will check for updat
 ```
 
 ##### News & Events
+
 ```
 /ev - Show crypto events
 /n - News about a coin
@@ -216,12 +297,14 @@ If you configured the bot correctly and execute it, the bot will check for updat
 ```
 
 ##### Utilities
+
 ```
 /po - Info about mining pools
 /wa - Details about wallets
 ```
 
 ##### Bot
+
 ```
 /about - Information about bot
 /bpmn - BPMN diagram for a command
@@ -276,46 +359,58 @@ wp - Find whitepaper for a coin
 ```
 
 ## Development
-I am actively developing this bot and will do so also in the near future. If you would like to help out with development, send a message via Telegram to [@endogen](https://telegram.me/endogen) or open an issue here at GitHub. 
+
+I am actively developing this bot and will do so also in the near future. If you would like to help out with development, send a message via Telegram to [@endogen](https://telegram.me/endogen) or open an issue here at GitHub.
 
 ### Todo
+
 ##### Priority 1
+
 - [ ] Add alerts for prices
 
 ##### Priority 2
+
 - [ ] Add maintenance mode
 - [ ] Ban user if rate limit exceeded to often
 
 ##### Priority 3
+
 - [ ] Provide BPMN diagrams for all commands
 
 ## Disclaimer
+
 I use this bot personally to check the current state of some coins but since all the data is relying on external APIs, i can't guarantee that all informations are correct. Please use with caution. **I can't be held responsible for anything!**
 
 ## Donating
+
 If you find **OpenCryptoBot** suitable for your needs, please consider donating whatever amount you like to:
 
 #### Bitcoin
+
 ```
 1EoBYmfdJznJ21v8Uiiv44iJ2sDb6Bsqc1
 ```
 
 #### Bitcoin Cash
+
 ```
 qzken7mgslv0w9t4ycj4uganv66ljccsq5ngcepp6h
 ```
 
 #### Ethereum (ETH)
+
 ```
 0x15c3dB6f0f3cC3A187Cfa4b20605293a08b9Be46
 ```
 
 #### Monero (XMR)
+
 ```
 42eSjjHF63P3LtxcdeC71TT3ZCcGbTtk1aESTvfrz4VqYeKMFP9tbWhjmcUJZE3yVrgDjH8uZhnob9czCtm764cFDWYPe7c
 ```
 
 #### How else can you support me?
+
 If you can't or don't want to donate, please consider signing up on listed exchanges below. They are really good and by using these links to register an account i get a share of the trading-fee that you pay to the exchange if you execute a trade.
 
 - [Binance](https://www.binance.com/?ref=16770868)
