@@ -1,25 +1,36 @@
-FROM python:3.7.9-slim
+FROM python:3.7-slim
 
 WORKDIR /app
 
-# Install system dependencies required for lxml
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    gcc \
-    python3-dev \
-    libxml2-dev \
-    libxslt1-dev \
-    zlib1g-dev \
+    build-essential \
+    libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first to leverage Docker cache
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application
+# Copy application code
 COPY . .
 
-# Create necessary directories and make run.sh executable
-RUN mkdir -p /app/conf /app/data /app/logs && \
-    chmod +x run.sh
+# Create necessary directories
+RUN mkdir -p /app/data /app/logs /app/conf/ssl
 
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+
+# Make run script executable
+RUN chmod +x run.sh
+
+# Expose webhook port
+EXPOSE 8443
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8443/health || exit 1
+
+# Start the bot
 CMD ["./run.sh"] 
