@@ -3,12 +3,20 @@ version: "3.8"
 services:
   bot:
     build: .
+    restart: always
+    environment:
+      - ENVIRONMENT=production
+      - CONFIG_FILE=/app/conf/config.prod.json
+      - TELEGRAM_BOT_TOKEN
     volumes:
-      - ./conf:/app/conf
       - ./data:/app/data
       - ./logs:/app/logs
-    environment:
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - TELEGRAM_READ_TIMEOUT=30
-      - TELEGRAM_CONNECT_TIMEOUT=30
-    restart: unless-stopped
+      - ./conf:/app/conf
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8443/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    ports:
+      - "8443:8443"

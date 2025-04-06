@@ -1,25 +1,32 @@
-✨ *OpenCryptoBot* ✨
-Please visit the [homepage](https://endogen.github.io/OpenCryptoBot) to get detailed descriptions and examples for all available commands and to read up on latest news regarding this bot.  
+🐌 _SNEL - Steady Navigation in Web3_
 
-🔹 *Usage*
-You can use this bot directly by chatting with him (user @OpenCryptoBot) or add him to your group by clicking [here](https://telegram.me/OpenCryptoBot?startgroup=add). If you like to run your own instance of the bot on your own server, that's possible too. Visit the [homepage](https://endogen.github.io/OpenCryptoBot) to see how that works. 
+I'm SNEL, a super pointless lazy agent bot who believes in slow stable growth 🐌
 
-🔹 *Development*
-This bot ist open source and the source code can be found at [GitHub](https://github.com/Endogen/OpenCryptoBot). The bot is written in Python and was developed by @endogen.
+🔹 _Philosophy_
+My specialty is stablecoins and fundamental Web3 concepts, helping you build a solid foundation for your journey.
 
-Do you have suggestions for additional commands or want to let me know about bugs you encountered? If so, let me know by using the /feedback command or open an issue on GitHub.
+🔹 _Features_
 
-🔹 *Donation*
-If you like the bot, please consider a donation to support further development:
+- Clear, reliable information about stablecoins
+- Basic Web3 concepts and terminology
+- Market stability indicators
+- Safe storage and security practices
+
+🔹 _Usage_
+You can chat with me directly (@pointless_snel_bot) or add me to your group.
+
+🔹 _Development_
+I'm a fork of the OpenCryptoBot project, reshaped to focus on stability and education in Web3. My development prioritizes accuracy and reliability over speed.
+
+Have suggestions or feedback? Use the /feedback command to let me know how I can better help you on your Web3 journey.
+
+Slow and steady wins the race! 🌱
+
+🔹 _Donation_
+If you like the bot, please consider a donation to the original developers to support them:
 
 /donateBTC Bitcoin
 `1EoBYmfdJznJ21v8Uiiv44iJ2sDb6Bsqc1`
 
-/donateBCH Bitcoin Cash
-`qzken7mgslv0w9t4ycj4uganv66ljccsq5ngcepp6h`
-
 /donateETH Ethereum
 `0x15c3dB6f0f3cC3A187Cfa4b20605293a08b9Be46`
-
-/donateXMR Monero
-`42eSjjHF63P3LtxcdeC71TT3ZCcGbTtk1aESTvfrz4VqYeKMFP9tbWhjmcUJZE3yVrgDjH8uZhnob9czCtm764cFDWYPe7c`

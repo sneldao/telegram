@@ -12,7 +12,7 @@ class Start(OpenCryptoPlugin):
     def get_cmds(self):
         return ["start"]
 
-    def get_action(self, bot, update, args):
+    def get_action(self, update, context):
         about_file = os.path.join(con.RES_DIR, self.START_FILENAME)
         with open(about_file, "r", encoding="utf8") as file:
             content = file.readlines()

@@ -4,15 +4,21 @@ services:
   bot:
     build: .
     restart: unless-stopped
+    ports:
+      - "8443:8443"
+    env_file:
+      - .env.prod
     volumes:
       - bot_data:/app/data
       - bot_logs:/app/logs
       - ./conf:/app/conf:ro # Read-only config
+      - ./conf/ssl:/app/conf/ssl:ro # Read-only SSL certs
     environment:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_READ_TIMEOUT=30
       - TELEGRAM_CONNECT_TIMEOUT=30
       - CONFIG_FILE=/app/conf/config.prod.json
+      - ENVIRONMENT=production
     logging:
       driver: "json-file"
       options:

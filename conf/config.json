@@ -1,15 +1,10 @@
 {
-    "admin_id": [],
+    "admin_id": [
+        569392733
+    ],
     "telegram": {
-        "read_timeout": 10,
-        "connect_timeout": 10
-    },
-    "webhook": {
-        "listen": "0.0.0.0",
-        "port": 8443,
-        "privkey_path": "/path/to/privkey.pem",
-        "cert_path": "/path/to/cert.pem",
-        "url": "https://your-domain.com"
+        "read_timeout": 30,
+        "connect_timeout": 30
     },
     "database": {
         "use_db": true,
@@ -17,11 +12,11 @@
     },
     "rate_limit": {
         "enabled": true,
-        "requests": 5,
-        "timespan": 30,
-        "incl_cmd": false
+        "requests": 30,
+        "timespan": 60,
+        "incl_cmd": true
     },
-    "refresh_cache": "6h",
+    "refresh_cache": "5m",
     "update": {
         "github_user": "",
         "github_repo": "",

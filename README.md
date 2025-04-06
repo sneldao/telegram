@@ -1,119 +1,97 @@
-# OpenCryptoBot
+# Snel Telegram Bot
 
-Welcome to the Swiss Army knife for crypto! _OpenCryptoBot_ is an open source Telegram bot written in Python and you can [add this bot directly](https://telegram.me/OpenCryptoBot) or add him by searching for user _@OpenCryptoBot_ on Telegram.
+A Python-based Telegram bot for cryptocurrency information and tracking. Built with security and scalability in mind.
 
-If you are interested in news regarding this bot or want more indept explanations for all available commands, please visit the [homepage](https://endogen.github.io/OpenCryptoBot).
+## Features
 
-<p align="center">
-  <img src="https://endogen.github.io/OpenCryptoBot/assets/screenshots/1.png">
-  <img src="https://endogen.github.io/OpenCryptoBot/assets/screenshots/2.png">
-</p>
+- Real-time cryptocurrency price tracking
+- Market data and analysis
+- Configurable alerts and notifications
+- Admin controls and rate limiting
+- Secure environment variable management
+- Production-ready Docker deployment
 
-<p align="center">
-  <img src="https://endogen.github.io/OpenCryptoBot/assets/screenshots/3.png">
-  <img src="https://endogen.github.io/OpenCryptoBot/assets/screenshots/4.png">
-</p>
+## Architecture
 
-## Overview
+### Local Development
 
-This Python script is a Telegram bot that can run in both polling and webhook modes. It provides comprehensive cryptocurrency information and tracking capabilities.
+```
+├── opencryptobot/     # Core bot logic
+├── conf/              # Configuration files
+│   ├── config.template.json    # Template configuration
+│   └── config.prod.json        # Production configuration
+├── docker-compose.yml         # Docker composition
+├── Dockerfile                # Container definition
+├── requirements.txt          # Python dependencies
+└── run.sh                   # Startup script
+```
 
-## Development Setup
+### Production Deployment
+
+- Hosted on dedicated VPS
+- Docker containerization
+- Environment variable management
+- Persistent volume storage
+- Health monitoring
+- Automatic restarts
+
+## Setup
 
 ### Prerequisites
 
-- Python 3.7
-- Docker and Docker Compose (for containerized deployment)
-- Git
+- Python 3.7+
+- Docker and Docker Compose
+- Telegram Bot Token (from @BotFather)
+- API Keys (optional, for enhanced functionality)
 
 ### Local Development
 
 1. Clone the repository:
 
 ```bash
-git clone <your-repo-url>
-cd opencryptobot
+git clone <repository-url>
+cd snel-telegram
 ```
 
-2. Create and configure environment files:
+2. Create environment file:
 
 ```bash
-# Copy environment template
-cp .env.prod.template .env
+cp .env.template .env
+# Edit .env with your configuration
+```
 
-# Copy config template
+3. Create configuration:
+
+```bash
 cp conf/config.template.json conf/config.json
-
-# Edit .env with your values
 # Edit conf/config.json with your settings
 ```
 
-3. Run with Docker (recommended):
+4. Run locally:
 
 ```bash
-# Build and start the bot
-docker compose up -d
-
-# View logs
-docker compose logs -f
+docker-compose up --build
 ```
 
-4. Run without Docker (alternative):
+### Production Deployment
+
+1. Set up server environment:
 
 ```bash
-# Create virtual environment
-python3.7 -m venv venv
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the bot
-./run.sh
-```
-
-## Production Deployment
-
-This bot can be deployed to production using Canine, a Kubernetes-based deployment platform.
-
-### Prerequisites
-
-- Docker v24.0.0 or higher
-- Docker Compose v2.0.0 or higher
-- Canine CLI
-
-### Deployment Steps
-
-1. Install Canine:
-
-```bash
-curl -sSL https://raw.githubusercontent.com/czhu12/canine/refs/heads/main/install/install.sh | bash
-```
-
-2. Prepare Production Configuration:
-
-```bash
-# Copy and edit production config
-cp conf/config.template.json conf/config.prod.json
-
-# Copy and edit production environment
+# Copy production environment template
 cp .env.prod.template .env.prod
+
+# Copy production config template
+cp conf/config.template.json conf/config.prod.json
 ```
 
-3. Configure Production Settings:
-
-   - Update `conf/config.prod.json` with your webhook domain
-   - Set up SSL certificates for webhook
-   - Configure admin IDs and rate limits
-   - Set up API keys for external services
-
-4. Deploy to Canine:
+2. Deploy to production:
 
 ```bash
-canine deploy -f .canine.yml --env-file .env.prod
+docker-compose -f docker-compose.prod.yml up -d
 ```
 
-### Production Features
+## Security
 
 - **Webhook Mode**: More efficient than polling for production
 - **Auto-scaling**: Handled by Kubernetes
@@ -204,11 +182,13 @@ canine deploy -f .canine.yml --env-file .env.prod
 
 ## Configuration
 
-This part is only relevant if you want to host this bot yourself. If you just want to use the bot, add user _@OpenCryptoBot_ to your Telegram contacts.
+### Environment Variables
 
-Before starting up the bot you have to take care of some settings and add some API tokens. All configuration files or token files are located in the `conf` folder.
+Required variables (set in .env):
 
-### config.json
+- `TELEGRAM_BOT_TOKEN`: Your bot token
+- `ENVIRONMENT`: development/production
+- `ADMIN_ID`: Telegram user ID for admin
 
 This file holds the configuration for the bot. You have to at least edit the value for **admin_id**. Every else setting is optional.
 
@@ -233,17 +213,28 @@ This file holds the configuration for the bot. You have to at least edit the val
 
 ### bot.token
 
-This file holds the Telegram bot token. You have to provide one and you will get it in a conversation with Telegram user [@BotFather](https://telegram.me/BotFather) while registering your bot.
+Edit `conf/config.json` or `conf/config.prod.json`:
 
-### cryptopanic.token
+- Admin settings
+- Rate limiting
+- Database configuration
+- Webhook settings (production)
+- Cache refresh intervals
 
-This file is optional and only needed if you use the `news` plugin. News are requested from [http://cryptopanic.com](http://cryptopanic.com) and thus you have to register an account there and get you API token and enter it in here.
+## Monitoring
 
-## Usage
+- Docker container health checks
+- Application logs
+- Error reporting
+- Performance metrics
 
-If you configured the bot correctly and execute it, the bot will check for updates (if enabled in `config.json`) and notify you if a new release is available. **Please ignore the update if you purposely downloaded the newest version from the `master` branch because the bot will only notify you about releases**. And in this case the release will be older then the current version from the `master` branch.
+## Contributing
 
-### Available commands
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ##### Charts
 
@@ -358,32 +349,13 @@ worst - Worst movers for hour or day
 wp - Find whitepaper for a coin
 ```
 
-## Development
-
-I am actively developing this bot and will do so also in the near future. If you would like to help out with development, send a message via Telegram to [@endogen](https://telegram.me/endogen) or open an issue here at GitHub.
-
-### Todo
-
-##### Priority 1
-
-- [ ] Add alerts for prices
-
-##### Priority 2
-
-- [ ] Add maintenance mode
-- [ ] Ban user if rate limit exceeded to often
-
-##### Priority 3
-
-- [ ] Provide BPMN diagrams for all commands
-
 ## Disclaimer
 
 I use this bot personally to check the current state of some coins but since all the data is relying on external APIs, i can't guarantee that all informations are correct. Please use with caution. **I can't be held responsible for anything!**
 
 ## Donating
 
-If you find **OpenCryptoBot** suitable for your needs, please consider donating whatever amount you like to:
+Forked from **OpenCryptoBot**, please consider donating whatever amount you like to:
 
 #### Bitcoin
 
@@ -411,7 +383,7 @@ qzken7mgslv0w9t4ycj4uganv66ljccsq5ngcepp6h
 
 #### How else can you support me?
 
-If you can't or don't want to donate, please consider signing up on listed exchanges below. They are really good and by using these links to register an account i get a share of the trading-fee that you pay to the exchange if you execute a trade.
+If you can't or don't want to donate, please consider signing up on listed exchanges below. They are really good and by using these links to register an account they get a share of the trading-fee that you pay to the exchange if you execute a trade.
 
 - [Binance](https://www.binance.com/?ref=16770868)
 - [KuCoin](https://www.kucoin.com/#/?r=H3QdJJ)

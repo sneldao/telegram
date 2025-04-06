@@ -1,15 +1,19 @@
 #!/bin/bash
 
 # Set default configuration file
-CONFIG_FILE=${CONFIG_FILE:-"conf/config.prod.json"}
+CONFIG_FILE=${CONFIG_FILE:-"conf/config.json"}
 
 # Load environment variables
 set -a
-source .env
+if [ -f ".env" ]; then
+    source .env
+fi
 set +a
 
 # Debug output
 echo "Bot token from env: $TELEGRAM_BOT_TOKEN"
+echo "Environment: $ENVIRONMENT"
+echo "Config file: $CONFIG_FILE"
 
 # Export connection settings to increase timeouts
 export TELEGRAM_READ_TIMEOUT=30
@@ -22,13 +26,8 @@ fi
 
 # Function to start the bot
 start_bot() {
-    if [ "$ENVIRONMENT" = "production" ]; then
-        # Webhook mode for production
-        python3 opencryptobot/start.py --config "$CONFIG_FILE" --webhook
-    else
-        # Polling mode for development
-        python3 opencryptobot/start.py --config "$CONFIG_FILE"
-    fi
+    # Run in polling mode for testing
+    python3 -u opencryptobot/start.py -cfg "$CONFIG_FILE" -lvl 10
 }
 
 # Retry logic

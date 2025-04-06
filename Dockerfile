@@ -1,4 +1,4 @@
-FROM python:3.7-slim
+FROM python:3.9-slim
 
 WORKDIR /app
 
@@ -22,8 +22,9 @@ RUN mkdir -p /app/data /app/logs /app/conf/ssl
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 
-# Make run script executable
-RUN chmod +x run.sh
+# Make run script executable and create symlink for .env
+RUN chmod +x run.sh && \
+    ln -sf .env.prod .env
 
 # Expose webhook port
 EXPOSE 8443

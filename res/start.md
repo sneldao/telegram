@@ -1,9 +1,9 @@
-✨ *OpenCryptoBot* ✨
+🐌 _SNEL - Your Steady Guide to Web3_ 🐌
 
-Welcome to the Swiss Army knife for crypto! I'm a bot and i can send you about anything crypto-related you need.
+Hello! I'm SNEL, your slow-but-sure companion in the world of Web3 and stablecoins.
 
-Just send me a message with one of the available commands with the appropriate argument(s) and i will return you the result.
+I am focused on providing information about stablecoins and Web3 fundamentals, helping you navigate this space as safely as possible.
 
-Click on /help to see all available commands with a short description or on /about to get more info about me.
+Type /help to see what I can do, or /about to learn more about me
 
-Cheers 🍻👋
+Get stable or die trying 🌱

@@ -48,55 +48,56 @@ class TelegramBot:
 
         try:
             self.updater = Updater(bot_token, request_kwargs=kwargs)
-        except InvalidToken as e:
-            cls_name = f"Class: {type(self).__name__}"
-            logging.error(f"{repr(e)} - {cls_name}")
-            exit("ERROR: Bot token not valid")
+            self.bot = self.updater.bot
+            self.job_queue = self.updater.job_queue
+            self.dispatcher = self.updater.dispatcher
 
-        self.job_queue = self.updater.job_queue
-        self.dispatcher = self.updater.dispatcher
+            # Load plugins
+            self._load_plugins()
+            logging.info("Plugins loaded")
 
-        # Load classes in folder 'plugins'
-        self._load_plugins()
-
-        # Handler for files downloads (plugins)
-        mh = MessageHandler(Filters.document, self._download)
-        self.dispatcher.add_handler(mh)
-
-        # Handler for command-links
-        self._add_link_handler()
-
-        # Handler for inline-mode
-        inline_handler = InlineQueryHandler(self._inline)
-        self.dispatcher.add_handler(inline_handler)
-
-        # Handle all Telegram related errors
-        self.dispatcher.add_error_handler(self._handle_tg_errors)
-
-        # Refresh cache periodically
-        self._refresh_cache()
-
-        # Check for updates periodically
-        self._update_check()
-
-    # Start the bot
-    def bot_start_polling(self):
-        self.updater.start_polling(clean=True)
-
-    # Go in idle mode
-    def bot_idle(self):
-        self.updater.idle()
+        except InvalidToken:
+            logging.error("Bot token not valid")
+            exit("Bot token not valid")
 
     def bot_start_webhook(self):
-        self.updater.start_webhook(
-            listen=Cfg.get("webhook", "listen"),
-            port=Cfg.get("webhook", "port"),
-            url_path=self.token,
-            key=Cfg.get("webhook", "privkey_path"),
-            cert=Cfg.get("webhook", "cert_path"),
-            webhook_url=f"{Cfg.get('webhook', 'url')}:"
-                        f"{Cfg.get('webhook', 'port')}/"
-                        f"{self.token}")
+        try:
+            listen = Cfg.get("webhook", "listen")
+            port = Cfg.get("webhook", "port")
+            key = Cfg.get("webhook", "privkey_path")
+            cert = Cfg.get("webhook", "cert_path")
+            url = f"{Cfg.get('webhook', 'url')}:{Cfg.get('webhook', 'port')}/{self.token}"
+
+            logging.info(f"Starting webhook on {listen}:{port}")
+            logging.info(f"Using key: {key}")
+            logging.info(f"Using cert: {cert}")
+            logging.info(f"Using URL: {url}")
+
+            self.updater.start_webhook(
+                listen=listen,
+                port=port,
+                url_path=self.token,
+                key=key,
+                cert=cert,
+                webhook_url=url)
+
+            logging.info("Webhook started successfully")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to start webhook: {str(e)}")
+            return False
+
+    def bot_start_polling(self):
+        try:
+            self.updater.start_polling()
+            logging.info("Polling started successfully")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to start polling: {str(e)}")
+            return False
+
+    def bot_idle(self):
+        self.updater.idle()
 
     def _cmd_link_callback(self, bot, update):
         cmd = update.effective_message.text.split('__')[0].replace("/_", "")

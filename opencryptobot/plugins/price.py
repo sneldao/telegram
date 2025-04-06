@@ -1,4 +1,5 @@
 import decimal
+import os
 import opencryptobot.emoji as emo
 import opencryptobot.utils as utl
 
@@ -12,18 +13,29 @@ from opencryptobot.plugin import OpenCryptoPlugin, Category, Keyword
 class Price(OpenCryptoPlugin):
 
     CG_URL = "https://www.coingecko.com/en/coins/"
+    
+    # Common cryptocurrency mappings
+    COMMON_COINS = {
+        "BTC": "bitcoin",
+        "ETH": "ethereum",
+        "USDT": "tether",
+        "USDC": "usd-coin",
+        "DAI": "dai",
+        "BNB": "binancecoin"
+    }
 
     def get_cmds(self):
         return ["p", "price"]
 
     @OpenCryptoPlugin.save_data
     @OpenCryptoPlugin.send_typing
-    def get_action(self, bot, update, args):
-        # TODO: Do this in every plugin
+    def get_action(self, update, context):
+        args = context.args if context.args else []
+        
+        # Handle keywords and arguments
         keywords = utl.get_kw(args)
         arg_list = utl.del_kw(args)
 
-        # TODO: Do this in most other plugins
         if not arg_list:
             if not keywords.get(Keyword.INLINE):
                 update.message.reply_text(
@@ -44,30 +56,40 @@ class Price(OpenCryptoPlugin):
         if len(arg_list) > 1:
             exchange = arg_list[1]
 
-        try:
-            response = APICache.get_cg_coins_list()
-        except Exception as e:
-            return self.handle_error(e, update)
+        # Check common coins first
+        coin_id = self.COMMON_COINS.get(coin)
+        coin_name = coin
 
-        coin_id = str()
-        coin_name = str()
-        for entry in response:
-            if entry["symbol"].upper() == coin:
-                coin_id = entry["id"]
-                coin_name = entry["name"]
-                break
+        # If not a common coin, try direct ID (lowercase)
+        if not coin_id:
+            coin_id = coin.lower()
+            coin_name = coin
 
         if RateLimit.limit_reached(update):
             return
 
         cg = CoinGecko()
+        cg.api_key = os.getenv("COINGECKO_API_KEY")
         msg = str()
 
         if exchange:
             try:
                 result = cg.get_coin_by_id(coin_id)
             except Exception as e:
-                return self.handle_error(e, update)
+                # If direct ID fails, try searching in the full list
+                try:
+                    response = APICache.get_cg_coins_list()
+                    for entry in response:
+                        if entry["symbol"].upper() == coin:
+                            coin_id = entry["id"]
+                            coin_name = entry["name"]
+                            break
+                    if coin_id:
+                        result = cg.get_coin_by_id(coin_id)
+                    else:
+                        return self.handle_error(f"Couldn't find cryptocurrency {coin}", update)
+                except Exception as e2:
+                    return self.handle_error(e2, update)
 
             if result:
                 vs_list = list()
@@ -101,7 +123,20 @@ class Price(OpenCryptoPlugin):
             try:
                 result = cg.get_simple_price(coin_id, vs_cur)
             except Exception as e:
-                return self.handle_error(e, update)
+                # If direct ID fails, try searching in the full list
+                try:
+                    response = APICache.get_cg_coins_list()
+                    for entry in response:
+                        if entry["symbol"].upper() == coin:
+                            coin_id = entry["id"]
+                            coin_name = entry["name"]
+                            break
+                    if coin_id:
+                        result = cg.get_simple_price(coin_id, vs_cur)
+                    else:
+                        return self.handle_error(f"Couldn't find cryptocurrency {coin}", update)
+                except Exception as e2:
+                    return self.handle_error(e2, update)
 
             if result:
                 for symbol, price in next(iter(result.values())).items():

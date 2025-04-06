@@ -48,107 +48,72 @@ class OpenCryptoBot:
 
         # Save logfile
         parser.add_argument(
-            "--no-logfile",
-            dest="savelog",
-            action="store_false",
-            help="don't save logs to file",
-            required=False,
-            default=True)
-
-        # Use database
-        parser.add_argument(
-            "--no-database",
-            dest="savedata",
-            action="store_false",
-            help="save command history to database",
-            required=False,
-            default=True)
-
-        # Logfile path
-        parser.add_argument(
             "-log",
             dest="logfile",
-            help="path to logfile",
+            help="path to log file",
             default=os.path.join(con.LOG_DIR, con.LOG_FILE),
             required=False,
             metavar="FILE")
 
-        # Log level
+        # Logging level
         parser.add_argument(
             "-lvl",
             dest="loglevel",
+            help="logging level",
             type=int,
-            choices=[0, 10, 20, 30, 40, 50],
-            help="Disabled, Debug, Info, Warning, Error, Critical",
-            default=30,
+            default=20,
             required=False)
 
-        # Module log level
+        # Module logging level
         parser.add_argument(
             "-mlvl",
             dest="mloglevel",
-            help="set log level for a module",
-            default=None,
+            help="module logging level",
+            required=False)
+
+        # Bot token
+        parser.add_argument(
+            "-tkn",
+            dest="token",
+            help="bot token",
             required=False)
 
         # Database path
         parser.add_argument(
             "-db",
             dest="database",
-            help="path to SQLite database file",
+            help="path to database file",
             default=os.path.join(con.DAT_DIR, con.DAT_FILE),
             required=False,
             metavar="FILE")
 
-        # Bot token
-        parser.add_argument(
-            "-tkn",
-            dest="token",
-            help="Telegram bot token",
-            required=False,
-            default=None)
-
-        # Webhook
+        # Use webhook
         parser.add_argument(
             "--webhook",
             dest="webhook",
+            help="use webhook",
             action="store_true",
-            help="use webhook instead of polling",
-            required=False,
-            default=False)
+            required=False)
 
         return parser.parse_args()
 
     # Configure logging
-    def _init_logger(self, logfile, level):
+    def _init_logger(self, log_path, log_level):
         logger = logging.getLogger()
-        logger.setLevel(level)
+        logger.setLevel(log_level)
 
-        log_format = '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
+        log_format = '%(asctime)s - %(levelname)s - %(message)s'
+        formatter = logging.Formatter(log_format)
 
-        # Log to console
-        console_log = logging.StreamHandler()
-        console_log.setFormatter(logging.Formatter(log_format))
-        console_log.setLevel(level)
-
-        logger.addHandler(console_log)
-
-        # Save logs if enabled
-        if self.args.savelog:
-            # Create 'log' directory if not present
-            log_path = os.path.dirname(logfile)
-            if not os.path.exists(log_path):
-                os.makedirs(log_path)
-
-            file_log = TimedRotatingFileHandler(
-                logfile,
-                when="H",
-                encoding="utf-8")
-
-            file_log.setFormatter(logging.Formatter(log_format))
-            file_log.setLevel(level)
-
+        if log_path:
+            os.makedirs(os.path.dirname(log_path), exist_ok=True)
+            file_log = TimedRotatingFileHandler(log_path, when="midnight", interval=1)
+            file_log.setFormatter(formatter)
             logger.addHandler(file_log)
+
+        console_log = logging.StreamHandler()
+        console_log.setFormatter(formatter)
+        logger.addHandler(console_log)
 
         # Set log level for specified modules
         if self.args.mloglevel:
@@ -166,6 +131,7 @@ class OpenCryptoBot:
         # Then check environment variable
         token = os.getenv("TELEGRAM_BOT_TOKEN")
         if token:
+            logging.info("Using bot token from environment variable")
             return token
 
         # Finally check token file
@@ -184,8 +150,22 @@ class OpenCryptoBot:
 
     def start(self):
         if self.args.webhook:
-            self.tg.bot_start_webhook()
+            logging.info("Starting bot in webhook mode")
+            if self.tg.bot_start_webhook():
+                logging.info("Webhook started successfully")
+            else:
+                logging.error("Failed to start webhook")
+                return
         else:
-            self.tg.bot_start_polling()
+            logging.info("Starting bot in polling mode")
+            if self.tg.bot_start_polling():
+                logging.info("Polling started successfully")
+            else:
+                logging.error("Failed to start polling")
+                return
 
         self.tg.bot_idle()
+
+
+if __name__ == '__main__':
+    OpenCryptoBot().start()

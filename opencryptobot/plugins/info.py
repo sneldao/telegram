@@ -6,7 +6,7 @@ from telegram import ParseMode
 from opencryptobot.ratelimit import RateLimit
 from opencryptobot.api.tokenstats import TokenStats
 from opencryptobot.api.cryptocompare import CryptoCompare
-from opencryptobot.plugin import OpenCryptoPlugin, Category
+from opencryptobot.plugin import OpenCryptoPlugin, Category, Keyword
 
 
 class Info(OpenCryptoPlugin):
@@ -15,27 +15,52 @@ class Info(OpenCryptoPlugin):
     TOKEN = "Token"
     COIN = "Coin"
 
-    coin_type = None
-    based_on = None
+    # Common cryptocurrency mappings
+    COMMON_COINS = {
+        "BTC": "BTC",
+        "ETH": "ETH",
+        "USDT": "USDT",
+        "USDC": "USDC",
+        "DAI": "DAI",
+        "BNB": "BNB"
+    }
+
+    def __init__(self, telegram_bot):
+        super().__init__(telegram_bot)
+        self.coin_type = None
+        self.based_on = None
 
     def get_cmds(self):
         return ["i", "info"]
 
     @OpenCryptoPlugin.save_data
     @OpenCryptoPlugin.send_typing
-    def get_action(self, bot, update, args):
-        if not args:
-            update.message.reply_text(
-                text=f"Usage:\n{self.get_usage()}",
-                parse_mode=ParseMode.MARKDOWN)
+    def get_action(self, update, context):
+        args = context.args if context.args else []
+        keywords = utl.get_kw(args)
+        arg_list = utl.del_kw(args)
+
+        if not arg_list:
+            if not keywords.get(Keyword.INLINE):
+                update.message.reply_text(
+                    text=f"Usage:\n{self.get_usage()}",
+                    parse_mode=ParseMode.MARKDOWN)
             return
 
         if RateLimit.limit_reached(update):
             return
 
-        coin = args[0].upper()
+        coin = arg_list[0].upper()
+        
+        # Check common coins mapping
+        if coin in self.COMMON_COINS:
+            coin = self.COMMON_COINS[coin]
 
         try:
+            # Reset class variables for new request
+            self.coin_type = None
+            self.based_on = None
+            
             type_thread = threading.Thread(target=self._get_coin_type, args=[coin])
             type_thread.start()
 
@@ -44,9 +69,8 @@ class Info(OpenCryptoPlugin):
             return self.handle_error(e, update)
 
         if coin_info["Message"] != "Success" or not coin_info["Data"]:
-            update.message.reply_text(
-                text=f"{emo.ERROR} No data for *{coin}*",
-                parse_mode=ParseMode.MARKDOWN)
+            msg = f"{emo.ERROR} No data for *{coin}*"
+            self.send_msg(msg, update, keywords)
             return
 
         name = coin_info["Data"][0]["CoinInfo"]["FullName"]
@@ -65,7 +89,6 @@ class Info(OpenCryptoPlugin):
 
             if self.based_on:
                 type += f" ({self.based_on})"
-
         else:
             type = str("-")
 
@@ -88,6 +111,9 @@ class Info(OpenCryptoPlugin):
                   f"Block reward: {block_reward}" \
                   f"`"
 
+        if keywords.get(Keyword.INLINE):
+            return f"[{name}]({image})\n\n{msg}"
+
         update.message.reply_photo(
             photo=image,
             caption=msg,
@@ -101,6 +127,9 @@ class Info(OpenCryptoPlugin):
 
     def get_category(self):
         return Category.GENERAL
+        
+    def inline_mode(self):
+        return True
 
     def _get_coin_type(self, coin):
         res = TokenStats().get_roi_for_symbol(coin)
