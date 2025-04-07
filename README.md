@@ -387,3 +387,113 @@ If you can't or don't want to donate, please consider signing up on listed excha
 
 - [Binance](https://www.binance.com/?ref=16770868)
 - [KuCoin](https://www.kucoin.com/#/?r=H3QdJJ)
+
+## Deployment Lessons & Best Practices
+
+### Webhook vs Polling Mode
+
+For production deployments, **webhook mode** is strongly recommended:
+
+- More efficient resource usage (no constant polling)
+- Faster response times (near-instant message processing)
+- Better scalability for production use
+- More reliable for long-term operation
+
+To ensure webhook mode works properly:
+
+1. Use port 443 in production (standard HTTPS port with fewer restrictions)
+2. Generate an SSL certificate with the correct Common Name (CN) matching your server IP or domain
+3. Make sure firewalls allow inbound connections on your webhook port
+4. Properly configure the webhook URL in config.prod.json
+
+### SSL Certificate Generation
+
+For testing and production, generate a self-signed certificate that matches your server's identity:
+
+```bash
+# Generate SSL certificate where CN matches your server IP or domain
+openssl req -newkey rsa:2048 -sha256 -nodes \
+  -keyout webhook.key -x509 -days 365 -out webhook.pem \
+  -subj '/C=US/ST=State/L=City/O=Organization/CN=your-server-ip-or-domain'
+```
+
+### Server Setup Process
+
+1. Prepare local environment:
+
+   ```bash
+   # Clone the repository
+   git clone https://github.com/yourusername/snel-telegram.git
+   cd snel-telegram
+
+   # Set up configuration
+   cp conf/config.template.json conf/config.prod.json
+   # Edit config.prod.json with your settings
+   ```
+
+2. Create SSL certificate directory:
+
+   ```bash
+   mkdir -p conf/ssl
+   # Generate SSL certificate as shown above
+   ```
+
+3. Create production environment file:
+
+   ```bash
+   cp .env.prod.template .env.prod
+   # Add your bot token to .env.prod
+   ```
+
+4. Deploy to server:
+
+   ```bash
+   # Copy files to server (adjust path)
+   rsync -avz --exclude 'venv' --exclude '.git' ./ root@your-server-ip:/opt/snel-telegram/
+
+   # SSH into server
+   ssh root@your-server-ip
+
+   # Open required port in firewall
+   ufw allow 443/tcp
+
+   # Start the bot
+   cd /opt/snel-telegram
+   docker-compose -f docker-compose.prod.yml up -d
+   ```
+
+5. Set up webhook with Telegram:
+
+   ```bash
+   curl -F "url=https://your-server-ip/your-bot-token" \
+     -F "certificate=@conf/ssl/webhook.pem" \
+     https://api.telegram.org/bot<your-bot-token>/setWebhook
+   ```
+
+6. Verify webhook status:
+   ```bash
+   curl https://api.telegram.org/bot<your-bot-token>/getWebhookInfo
+   ```
+
+### Troubleshooting
+
+Common issues:
+
+- **Connection timeouts**: Check firewall settings, try standard port 443
+- **Certificate errors**: Ensure the certificate CN matches your server identity
+- **Webhook not receiving messages**: Verify webhook URL and check Telegram webhook info
+- **Bot not responding**: Check Docker logs for specific errors
+- **Docker container restarting**: Examine logs for runtime errors
+
+### Database & Persistent Storage
+
+The bot uses Docker volumes for data persistence:
+
+- `bot_data`: Stores database and user information
+- `bot_logs`: Stores application logs
+
+### Monitoring
+
+- Check bot status: `docker-compose -f docker-compose.prod.yml ps`
+- View logs: `docker-compose -f docker-compose.prod.yml logs`
+- Follow real-time logs: `docker-compose -f docker-compose.prod.yml logs -f`

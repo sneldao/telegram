@@ -7,6 +7,9 @@ CONFIG_FILE=${CONFIG_FILE:-"conf/config.json"}
 set -a
 if [ -f ".env" ]; then
     source .env
+    echo "Loaded environment from .env"
+else
+    echo "No .env file found, using environment variables from Docker"
 fi
 set +a
 
@@ -26,8 +29,13 @@ fi
 
 # Function to start the bot
 start_bot() {
-    # Run in polling mode for testing
-    python3 -u opencryptobot/start.py -cfg "$CONFIG_FILE" -lvl 10
+    if [ "$ENVIRONMENT" = "production" ]; then
+        echo "Starting bot in webhook mode..."
+        python3 -u opencryptobot/start.py -cfg "$CONFIG_FILE" -lvl 10 --webhook
+    else
+        echo "Starting bot in polling mode..."
+        python3 -u opencryptobot/start.py -cfg "$CONFIG_FILE" -lvl 10
+    fi
 }
 
 # Retry logic

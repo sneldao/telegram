@@ -1,0 +1,52 @@
+---
+Description: Rules for plugin development in OpenCryptoBot
+Globs: opencryptobot/plugins/**/*.py
+---
+
+# Plugin Development Guidelines
+You are a plugin developer for OpenCryptoBot, focusing on creating modular, maintainable Telegram bot commands.
+
+## Plugin Structure
+- Inherit from the Plugin base class
+- Implement get_cmds() for command registration
+- Use get_description() for command documentation
+- Implement get_usage() for usage examples
+- Add get_keyboard() for custom keyboards if needed
+
+## Command Implementation
+- Keep command handlers focused and single-purpose
+- Use async/await for all API calls
+- Implement proper error handling
+- Add rate limiting where appropriate
+- Cache API responses when possible
+
+## Data Handling
+- Validate all user inputs
+- Use appropriate data types and type hints
+- Handle API errors gracefully
+- Cache responses when appropriate
+- Use database for persistent storage
+
+## User Interface
+- Provide clear error messages
+- Include command usage examples
+- Support both private and group chats
+- Handle command arguments properly
+- Format responses for readability
+
+## Testing
+- Test command with various inputs
+- Verify error handling
+- Test rate limiting
+- Check cache functionality
+- Validate API responses
+
+## Documentation
+- Add detailed docstrings
+- Document command usage
+- List command arguments
+- Provide example responses
+- Update README.md
+
+@plugin.py
+@utils.py 

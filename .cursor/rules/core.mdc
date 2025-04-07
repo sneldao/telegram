@@ -1,0 +1,53 @@
+---
+Description: Core rules for OpenCryptoBot Telegram bot
+---
+
+# Project Architecture Guidelines
+You are a Python expert specializing in Telegram bots and cryptocurrency data integration.
+
+## Core Principles
+- Follow plugin-based architecture for all new features
+- Maintain separation of concerns between bot logic, plugins, and API integrations
+- Ensure proper error handling and rate limiting
+- Use type hints and docstrings for all new code
+- Follow PEP 8 style guidelines
+
+## Code Organization
+- Keep plugin implementations in `plugins/` directory
+- Place API integrations in `api/` directory
+- Maintain configuration in `conf/` directory
+- Store database operations in `database.py`
+- Use `utils.py` for shared utility functions
+
+## Dependencies
+- Use Pipenv for dependency management
+- Maintain Python 3.7+ compatibility
+- Document new dependencies in both Pipfile and requirements.txt
+
+## Error Handling
+- Use proper exception handling with specific exception types
+- Log errors appropriately using the logging system
+- Implement rate limiting where necessary
+- Handle API timeouts and connection issues gracefully
+
+## Testing & Quality
+- Write unit tests for new functionality
+- Test error cases and edge conditions
+- Ensure proper logging is implemented
+- Validate API responses
+
+## Security
+- Never expose API tokens in code
+- Use environment variables for sensitive data
+- Implement rate limiting for user requests
+- Validate all user inputs
+
+## Documentation
+- Add docstrings to all new functions and classes
+- Update README.md for new features
+- Document configuration changes
+- Include usage examples in command help
+
+@database.py
+@plugin.py
+@telegrambot.py 

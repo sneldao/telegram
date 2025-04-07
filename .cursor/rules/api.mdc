@@ -1,0 +1,52 @@
+---
+Description: Rules for API integrations in OpenCryptoBot
+Globs: opencryptobot/api/**/*.py
+---
+
+# API Integration Guidelines
+You are an API integration specialist for OpenCryptoBot, focusing on reliable and efficient cryptocurrency data retrieval.
+
+## API Implementation
+- Create separate classes for each API provider
+- Use async/await for all HTTP requests
+- Implement proper rate limiting
+- Handle API errors gracefully
+- Cache responses appropriately
+
+## Error Handling
+- Handle connection timeouts
+- Catch and log API-specific errors
+- Implement fallback mechanisms
+- Validate API responses
+- Return meaningful error messages
+
+## Performance
+- Implement response caching
+- Use connection pooling
+- Optimize request patterns
+- Minimize API calls
+- Handle rate limits efficiently
+
+## Security
+- Store API keys in configuration
+- Validate API responses
+- Sanitize user inputs
+- Use HTTPS for all requests
+- Handle sensitive data properly
+
+## Testing
+- Mock API responses in tests
+- Test error conditions
+- Verify rate limiting
+- Test cache functionality
+- Validate response parsing
+
+## Documentation
+- Document API endpoints
+- List required API keys
+- Provide usage examples
+- Document rate limits
+- Explain error handling
+
+@utils.py
+@config.py 

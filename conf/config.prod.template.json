@@ -1,0 +1,33 @@
+{
+    "admin_id": [
+        123456789
+    ],
+    "telegram": {
+        "read_timeout": 30,
+        "connect_timeout": 30
+    },
+    "webhook": {
+        "listen": "0.0.0.0",
+        "port": 443,
+        "privkey_path": "/app/conf/ssl/webhook.key",
+        "cert_path": "/app/conf/ssl/webhook.pem",
+        "url": "https://your-server-ip"
+    },
+    "database": {
+        "use_db": true,
+        "track_admins": true
+    },
+    "rate_limit": {
+        "enabled": true,
+        "requests": 30,
+        "timespan": 60,
+        "incl_cmd": true
+    },
+    "refresh_cache": "5m",
+    "update": {
+        "github_user": "",
+        "github_repo": "",
+        "update_hash": null,
+        "update_check": "1d"
+    }
+}
