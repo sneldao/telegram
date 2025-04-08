@@ -29,7 +29,8 @@ class Candlestick(OpenCryptoPlugin):
 
     @OpenCryptoPlugin.save_data
     @OpenCryptoPlugin.send_typing
-    def get_action(self, bot, update, args):
+    def get_action(self, update, context):
+        args = context.args if context.args else []
         keywords = utl.get_kw(args)
         arg_list = utl.del_kw(args)
 
@@ -203,40 +204,61 @@ class Candlestick(OpenCryptoPlugin):
         max_value = max(h)
         if max_value > 0.9:
             if max_value > 999:
-                margin_l = 120
+                margin_l = 110
                 tickformat = "0,.0f"
             else:
-                margin_l = 125
+                margin_l = 115
                 tickformat = "0.2f"
 
+        data = [
+            go.Candlestick(
+                x=[pd.to_datetime(tm, unit='s').strftime('%Y-%m-%d %H:%M:%S') for tm in t],
+                open=o,
+                high=h,
+                low=l,
+                close=c
+            )
+        ]
+
         try:
-            fig = fif.create_candlestick(o, h, l, c, pd.to_datetime(t, unit='s'))
+            fig = fif.create_candlestick(
+                open=o,
+                high=h,
+                low=l,
+                close=c,
+                dates=[pd.to_datetime(tm, unit='s').strftime('%Y-%m-%d %H:%M:%S') for tm in t],
+                direction="both",
+                title=coin
+            )
         except Exception as e:
             return self.handle_error(e, update)
 
-        fig['layout']['yaxis'].update(
-            tickformat=tickformat,
-            tickprefix="   ",
-            ticksuffix=f"  ")
+        for i in range(len(fig.layout.annotations)):
+            fig.layout.annotations[i].font.size = 15
 
-        fig['layout'].update(
-            title=dict(
-                text=coin,
-                font=dict(
-                    size=26
-                )
+        fig.layout.yaxis.tickprefix = "   "
+        fig.layout.yaxis.ticksuffix = f"   {base_coin}"
+        fig.layout.yaxis.tickfont.size = 12
+
+        fig.layout.update(
+            images=[dict(
+                source=f"{con.CMC_LOGO_URL_PARTIAL}{self.cmc_coin_id}.png",
+                opacity=0.8,
+                xref="paper", yref="paper",
+                x=1.05, y=1,
+                sizex=0.2, sizey=0.2,
+                xanchor="right", yanchor="bottom"
+            )],
+            autosize=False,
+            width=800,
+            height=600,
+            margin=go.layout.Margin(
+                l=margin_l,
+                r=50,
+                b=85,
+                t=100,
+                pad=4
             ),
-            yaxis=dict(
-                title=dict(
-                    text=base_coin,
-                    font=dict(
-                        size=18
-                    )
-                ),
-            )
-        )
-
-        fig['layout'].update(
             shapes=[{
                 "type": "line",
                 "xref": "paper",
@@ -250,41 +272,46 @@ class Candlestick(OpenCryptoPlugin):
                     "width": 1,
                     "dash": "dot"
                 }
-            }])
+            }]
+        )
 
-        fig['layout'].update(
-            paper_bgcolor='rgb(233,233,233)',
-            plot_bgcolor='rgb(233,233,233)',
-            autosize=False,
-            width=800,
-            height=600,
-            margin=go.layout.Margin(
-                l=margin_l,
-                r=50,
-                b=85,
-                t=100,
-                pad=4
-            ))
+        fig.layout.yaxis.tickformat = tickformat
 
-        cmc_thread.join()
+        self.send_chart(fig, update, keywords)
 
-        fig['layout'].update(
-            images=[dict(
-                source=f"{con.CMC_LOGO_URL_PARTIAL}{self.cmc_coin_id}.png",
-                opacity=0.8,
-                xref="paper", yref="paper",
-                x=1.05, y=1,
-                sizex=0.2, sizey=0.2,
-                xanchor="right", yanchor="bottom"
-            )])
+    def send_chart(self, fig, update, keywords):
+        if keywords.get(Keyword.PNG):
+            pio.write_image(fig, 'candlestick.png')
 
-        self.send_photo(
-            io.BufferedReader(BytesIO(pio.to_image(fig, format='jpeg'))),
-            update,
-            keywords)
+            with open('candlestick.png', 'rb') as f:
+                photo = io.BufferedReader(f)
+                update.message.reply_photo(photo=photo)
+            return
+
+        if keywords.get(Keyword.INLINE):
+            filename = f"candlestick.png"
+
+            bio = BytesIO()
+            pio.write_image(fig, bio, format="png")
+            bio.seek(0)
+            return bio, filename
+
+        filename = f"candlestick.html"
+        chart = pio.to_html(fig, include_plotlyjs='cdn', auto_open=False)
+
+        with open(filename, 'w') as chartfile:
+            chartfile.write(chart)
+
+        with open(filename, 'rb') as chartfile:
+            update.message.reply_document(
+                document=chartfile)
 
     def get_usage(self):
-        return f"`/{self.get_cmds()[0]} <symbol>(-<target symbol>) (<timeframe>m|h|d)`"
+        return f"`/{self.get_cmds()[0]} <symbol>(-<target symbol>) (<timeframe>)`\n\n" \
+               f"The following time frames are supported:\n" \
+               f"m = Minutes\n" \
+               f"h = Hours\n" \
+               f"d = Days"
 
     def get_description(self):
         return "Candlestick chart for coin"
@@ -295,7 +322,12 @@ class Candlestick(OpenCryptoPlugin):
     def _get_cmc_coin_id(self, ticker):
         self.cmc_coin_id = None
 
-        for listing in APICache.get_cmc_coin_list():
-            if ticker.upper() == listing["symbol"].upper():
-                self.cmc_coin_id = listing["id"]
-                break
+        try:
+            response = APICache.get_cmc_coin_list()
+        except Exception:
+            return
+
+        for entry in response["data"]:
+            if entry["symbol"].upper() == ticker:
+                self.cmc_coin_id = entry["id"]
+                return

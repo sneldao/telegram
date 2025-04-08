@@ -9,3 +9,4 @@ NO_ENTRY = "🚫"  # Rate limit reached
 CANCEL = "❌"  # Repeater deleted
 HEART = "❤"  # Favorite count
 REPEAT = "🔄"  # Retweet count
+CHART = "📊"  # Chart generation

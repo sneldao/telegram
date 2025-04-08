@@ -14,7 +14,7 @@ class About(OpenCryptoPlugin):
 
     @OpenCryptoPlugin.save_data
     @OpenCryptoPlugin.send_typing
-    def get_action(self, bot, update, args):
+    def get_action(self, update, context):
         about_file = os.path.join(con.RES_DIR, self.ABOUT_FILENAME)
         with open(about_file, "r", encoding="utf8") as file:
             content = file.readlines()
