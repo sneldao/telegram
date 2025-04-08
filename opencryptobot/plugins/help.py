@@ -40,8 +40,7 @@ class Help(OpenCryptoPlugin):
                 msg += "/top - See top cryptocurrencies\n\n"
                 
                 msg += "*📰 News & Updates*\n"
-                msg += "/n - Get latest crypto news\n"
-                msg += "/tw - See recent tweets about a coin\n\n"
+                msg += "/n - Get latest crypto news\n\n"
                 
                 msg += "*🤖 Bot Commands*\n"
                 msg += "/about - Learn about SNEL\n"

@@ -3,6 +3,7 @@ import json
 import logging
 import opencryptobot.emoji as emo
 import opencryptobot.constants as con
+import opencryptobot.utils as utl
 
 from datetime import datetime
 from telegram import ParseMode
@@ -37,7 +38,11 @@ class News(OpenCryptoPlugin):
 
     @OpenCryptoPlugin.save_data
     @OpenCryptoPlugin.send_typing
-    def get_action(self, bot, update, args):
+    def get_action(self, update, context):
+        args = context.args if context.args else []
+        keywords = utl.get_kw(args)
+        arg_list = utl.del_kw(args)
+
         symbol = str()
         filter = str()
         msg = str()
@@ -49,9 +54,16 @@ class News(OpenCryptoPlugin):
             if RateLimit.limit_reached(update):
                 return
 
+            # Send loading message
+            loading_msg = update.message.reply_text(
+                text=f"{emo.WAIT} Fetching latest crypto news...",
+                parse_mode=ParseMode.MARKDOWN
+            )
+
             try:
                 data = cp.get_posts()
             except Exception as e:
+                loading_msg.delete()
                 return self.handle_error(e, update)
 
             msg = f"<b>Current news</b>\n\n"
@@ -82,6 +94,19 @@ class News(OpenCryptoPlugin):
             if RateLimit.limit_reached(update):
                 return
 
+            # Send loading message
+            loading_text = f"{emo.WAIT} Fetching news"
+            if symbol:
+                loading_text += f" for *{symbol}*"
+            if filter:
+                loading_text += f" with filter '*{filter}*'"
+            loading_text += "..."
+            
+            loading_msg = update.message.reply_text(
+                text=loading_text,
+                parse_mode=ParseMode.MARKDOWN
+            )
+
             try:
                 if symbol and filter:
                     data = cp.get_multiple_filters(symbol, filter)
@@ -93,9 +118,11 @@ class News(OpenCryptoPlugin):
                     data = cp.get_filtered_news(filter)
                     msg = f"<b>News for filter '{filter}</b>'\n\n"
             except Exception as e:
+                loading_msg.delete()
                 return self.handle_error(e, update)
 
         if not data or not data["results"]:
+            loading_msg.delete()
             update.message.reply_text(
                 text=f"{emo.ERROR} Couldn't retrieve news",
                 parse_mode=ParseMode.MARKDOWN)
@@ -117,6 +144,8 @@ class News(OpenCryptoPlugin):
                 msg += f'{t.year}-{month}-{day} {hour}:{minute} - {domain}\n' \
                        f'<a href="{url}">{title.strip()}</a>\n\n'
 
+        # Delete loading message before sending news
+        loading_msg.delete()
         update.message.reply_text(
             text=msg,
             parse_mode=ParseMode.HTML,

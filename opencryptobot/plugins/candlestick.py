@@ -65,6 +65,12 @@ class Candlestick(OpenCryptoPlugin):
         if RateLimit.limit_reached(update):
             return
 
+        # Send loading message
+        loading_msg = update.message.reply_text(
+            text=f"{emo.CHART} Generating candlestick chart for *{coin}*-*{base_coin}* ({time_frame}{resolution[0].lower()})...",
+            parse_mode=ParseMode.MARKDOWN
+        )
+
         cmc_thread = threading.Thread(target=self._get_cmc_coin_id, args=[coin])
         cmc_thread.start()
 
@@ -80,6 +86,7 @@ class Candlestick(OpenCryptoPlugin):
                 resolution = "DAY"
                 time_frame = arg_list[1][:-1]
             else:
+                loading_msg.delete()
                 update.message.reply_text(
                     text=f"{emo.ERROR} Argument *{arg_list[1]}* is invalid",
                     parse_mode=ParseMode.MARKDOWN)
@@ -107,9 +114,11 @@ class Candlestick(OpenCryptoPlugin):
                     base_coin,
                     time_frame)
         except Exception as e:
+            loading_msg.delete()
             return self.handle_error(e, update)
 
         if ohlcv["Response"] == "Error":
+            loading_msg.delete()
             if ohlcv["Message"] == "limit is larger than max value.":
                 update.message.reply_text(
                     text=f"{emo.ERROR} Time frame can't be larger "
@@ -118,7 +127,7 @@ class Candlestick(OpenCryptoPlugin):
                 return
             else:
                 update.message.reply_text(
-                    text=f"{emo.ERROR} CoinGecko: {ohlcv['Message']}",
+                    text=f"{emo.ERROR} CryptoCompare: {ohlcv['Message']}",
                     parse_mode=ParseMode.MARKDOWN)
                 return
 
@@ -132,9 +141,11 @@ class Candlestick(OpenCryptoPlugin):
                 c = [value["close"] for value in ohlcv]
                 t = [value["time"] for value in ohlcv]
             except:
+                loading_msg.delete()
                 return self.handle_error(f"No OHLC data for {coin}", update)
 
         if not ohlcv or utl.all_same(o, h, l, c):
+            loading_msg.delete()
             if base_coin != "BTC" and base_coin != "USD":
                 update.message.reply_text(
                     text=f"{emo.ERROR} Base currency for "
@@ -158,6 +169,7 @@ class Candlestick(OpenCryptoPlugin):
             try:
                 cp_ohlc = APICache.get_cp_coin_list()
             except Exception as e:
+                loading_msg.delete()
                 return self.handle_error(e, update)
 
             for c in cp_ohlc:
@@ -177,12 +189,14 @@ class Candlestick(OpenCryptoPlugin):
                             quote=base_coin.lower(),
                             limit=366)
                     except Exception as e:
+                        loading_msg.delete()
                         return self.handle_error(e, update)
 
                     cp_api = True
                     break
 
             if not ohlcv:
+                loading_msg.delete()
                 update.message.reply_text(
                     text=f"{emo.ERROR} No OHLC data for *{coin}* "
                     f"available or time frame too big",
@@ -196,6 +210,7 @@ class Candlestick(OpenCryptoPlugin):
                 c = [value["close"] for value in ohlcv]
                 t = [time.mktime(dau.parse(value["time_close"]).timetuple()) for value in ohlcv]
             except:
+                loading_msg.delete()
                 return self.handle_error(f"No OHLC data for {coin}", update)
 
         margin_l = 140
@@ -231,6 +246,7 @@ class Candlestick(OpenCryptoPlugin):
                 title=coin
             )
         except Exception as e:
+            loading_msg.delete()
             return self.handle_error(e, update)
 
         for i in range(len(fig.layout.annotations)):
@@ -277,6 +293,8 @@ class Candlestick(OpenCryptoPlugin):
 
         fig.layout.yaxis.tickformat = tickformat
 
+        # Delete loading message before sending chart
+        loading_msg.delete()
         self.send_chart(fig, update, keywords)
 
     def send_chart(self, fig, update, keywords):
