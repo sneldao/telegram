@@ -20,18 +20,9 @@ class News(OpenCryptoPlugin):
 
     def __init__(self, telegram_bot):
         super().__init__(telegram_bot)
-
-        token_path = os.path.join(con.CFG_DIR, con.TKN_FILE)
-
-        try:
-            if os.path.isfile(token_path):
-                with open(token_path, 'r') as file:
-                    self._token = json.load(file)["cryptopanic"]
-            else:
-                logging.error(f"No token file '{con.TKN_FILE}' found at '{token_path}'")
-        except KeyError as e:
-            cls_name = f"Class: {type(self).__name__}"
-            logging.error(f"{repr(e)} - {cls_name}")
+        self._token = os.getenv("CRYPTOPANIC_API_TOKEN")
+        if not self._token:
+            logging.error("CRYPTOPANIC_API_TOKEN not found in environment variables")
 
     def get_cmds(self):
         return ["n", "news"]
